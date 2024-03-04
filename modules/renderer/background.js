@@ -16,6 +16,7 @@ import { utilRebind } from '../util/rebind';
 
 
 let _imageryIndex = null;
+let _customCount = prefs('custom-template-count');
 
 export function rendererBackground(context) {
   const dispatch = d3_dispatch('change');
@@ -78,9 +79,26 @@ export function rendererBackground(context) {
         _imageryIndex.backgrounds.unshift(rendererBackgroundSource.None());
 
         // Add 'Custom'
-        let template = prefs('background-custom-template') || '';
-        const custom = rendererBackgroundSource.Custom(template);
-        _imageryIndex.backgrounds.unshift(custom);
+        const createCustom = prefs('background-custom-template')
+        
+        // const customTemplates = [
+        //   prefs('background-custom-template-1') || '',
+        //   prefs('background-custom-template-2') || '',
+        //   // ... add more templates as needed
+        // ];
+        var customTemplates = [];
+        for(let i =0; i < _customCount; i++){
+          customTemplates.push(prefs('background-custom-template-' + (i + 1)));
+        }
+        
+        const customSources = customTemplates.map((template, index) => {
+          return rendererBackgroundSource.Custom(template, index + 1);
+        });
+        
+        
+        
+        _imageryIndex.backgrounds.unshift(rendererBackgroundSource.Custom(createCustom));
+        _imageryIndex.backgrounds.unshift(...customSources);
 
         return _imageryIndex;
       });

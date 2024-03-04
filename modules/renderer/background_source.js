@@ -561,8 +561,8 @@ rendererBackgroundSource.None = function() {
 };
 
 
-rendererBackgroundSource.Custom = function(template) {
-    var source = rendererBackgroundSource({ id: 'custom', template: template });
+rendererBackgroundSource.Custom = function(template, index) {
+    var source = rendererBackgroundSource({ id: 'custom' + (index || ''), template: template, key:index });
 
 
     source.name = function() {
@@ -577,6 +577,7 @@ rendererBackgroundSource.Custom = function(template) {
     source.imageryUsed = function() {
         // sanitize personal connection tokens - #6801
         var cleaned = source.template();
+        console.log(cleaned);
 
         // from query string parameters
         if (cleaned.indexOf('?') !== -1) {

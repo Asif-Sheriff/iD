@@ -274,7 +274,10 @@ export function uiSectionBackgroundList(context) {
 
     context.background()
         .on('change.background_list', function() {
-            _backgroundList.call(updateLayerSelections);
+            console.log('afachagend');
+            setTimeout(function() {
+                _backgroundList.call(updateLayerSelections);
+            }, 1000);
         });
 
     context.map()

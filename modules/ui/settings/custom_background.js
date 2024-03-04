@@ -8,6 +8,8 @@ import { utilNoAuto, utilRebind } from '../../util';
 
 
 export function uiSettingsCustomBackground() {
+    var _customCount = prefs('custom-template-count');
+
     var dispatch = d3_dispatch('change');
 
     function render(selection) {
@@ -19,7 +21,7 @@ export function uiSettingsCustomBackground() {
             template: prefs('background-custom-template')
         };
 
-        var example = 'https://tile.openstreetmap.org/{zoom}/{x}/{y}.png';        
+        var example = 'https://tile.openstreetmap.org/{zoom}/{x}/{y}.png';
         var modal = uiConfirm(selection).okButton();
 
         modal
@@ -49,16 +51,7 @@ export function uiSettingsCustomBackground() {
             `* ${t.html('settings.custom_background.instructions.tms.tokens.scale_factor')}\n` +
             '\n' +
             `#### ${t.html('settings.custom_background.instructions.example')}\n` +
-            `\`${example}\`\n` +
-            `#### ${t.html('settings.custom_background.instructions.multiple.multiple_label')}\n` +
-            `* ${t.html('settings.custom_background.instructions.multiple.steps.step1')}\n` +
-            `* ${t.html('settings.custom_background.instructions.multiple.steps.step2')}\n` +
-            `* ${t.html('settings.custom_background.instructions.multiple.steps.step3')}\n` +
-            `#### ${t.html('settings.custom_background.instructions.example')}\n` +
-            `${t.html('settings.custom_background.instructions.multiple.steps.example_step1')}\n` +
-            `${t.html('settings.custom_background.instructions.multiple.steps.example_step2')}\n` +
-            `${t.html('settings.custom_background.instructions.multiple.steps.example_step3')}\n` +            
-            `* ${t.html('settings.custom_background.instructions.multiple.steps.example_step4')}`;           
+            `\`${example}\``;
 
         textSection
             .append('div')
@@ -98,39 +91,20 @@ export function uiSettingsCustomBackground() {
         // restore the original template
         function clickCancel() {
             textSection.select('.field-template').property('value', _origSettings.template);
+            _customCount -= 1;
+            // Temporary method to delete layers REMOVE LATERRR
+            prefs('custom-template-count',_customCount);
             prefs('background-custom-template', _origSettings.template);
             this.blur();
             modal.close();
         }
 
-        //function to parse the text box and select the correct template
-        function parseCustomTemplate() {
-            var tempString = textSection.select('.field-template').property('value');
-            var urls = tempString.split('\n'); // Split the input into an array of URLs
-            var selectedUrl;
-        
-            for (let i = 0; i < urls.length; i++) {
-                var currentUrl = urls[i].trim();
-
-                // Skip if url starts with #
-                if (currentUrl.startsWith('#')) {
-                    continue;
-                }        
-                // If no URL is selected yet, or if the current URL has a higher priority (lower index), update the selected URL
-                if (!selectedUrl || currentUrl.endsWith(selectedUrl.substring(selectedUrl.lastIndexOf('/') + 1))) {
-                    selectedUrl = currentUrl;
-                }
-            }
-
-            return selectedUrl;
-        }
-        
-
         // accept the current template
         function clickSave() {
-            var originalTemplate = textSection.select('.field-template').property('value');            
-            _currSettings.template = parseCustomTemplate();
-            prefs('background-custom-template', originalTemplate);
+            
+            _currSettings.template = textSection.select('.field-template').property('value');
+            prefs('background-custom-template-' + (++_customCount) , _currSettings.template);
+            prefs('custom-template-count', _customCount);
             this.blur();
             modal.close();
             dispatch.call('change', this, _currSettings);
